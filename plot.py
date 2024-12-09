@@ -7,7 +7,7 @@ if __name__ == '__main__':
                         help='Path for labels')
     parser.add_argument('--pred_path', type=str, default='./data/pred.npy',
                         help='Path for predictions')   
-    parser.add_argument('--name', type=str, default='D on sample-level',
+    parser.add_argument('--name', type=str, default='D_on_sample_level',
                         help='S/D/HR/RR on sample-level/subject-level')
     args = parser.parse_args()
 
@@ -16,4 +16,4 @@ if __name__ == '__main__':
 
     bland_altman_plot(pred, label, args.name)
     trend_plot(pred, label, args.name)
-    generate_metrics_table(args.pred_path, args.label_path)
+    generate_pdf(args.pred_path, args.label_path, args.name)

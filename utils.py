@@ -2,6 +2,7 @@ import numpy as np
 from prettytable import PrettyTable
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
+import os
 
 def bland_altman_plot(pred, label, name):
     """
@@ -80,7 +81,7 @@ def trend_plot(pred, label, name):
     plt.title(f'Trend Plot of {name}')
     plt.savefig('./Fig/Trend_Plot_' + name + '.png')
 
-def generate_metrics_table(pred_path, label_path, metrics=['ME', 'SD'], output_latex=True):
+def generate_pdf(pred_path, label_path, name, metrics=['ME', 'SD', 'SD', 'Correlation'], output_latex=True):
     """
     Calculate metrics from prediction and label arrays, and display as a table.
 
@@ -131,26 +132,51 @@ def generate_metrics_table(pred_path, label_path, metrics=['ME', 'SD'], output_l
         }
 
         # Build the LaTeX table dynamically
-        latex_table = """
-\\begin{table}[h!]
-\\centering
-\\begin{tabular}{|c|c|}
-\\hline
-Metric & Value \\\\ \\hline
+        latex_table = rf"""
+\documentclass{{article}}
+\usepackage[utf8]{{inputenc}}
+\usepackage{{graphicx}}
+\usepackage{{float}}
+
+\begin{{document}}
+
+\begin{{figure}}[H]
+\centering
+\includegraphics[width=\textwidth]{{./Fig/Trend_Plot_{name}.png}}
+\caption{{Trend Plot}}
+\label{{fig:image1}}
+\end{{figure}}
+
+\begin{{figure}}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{{./Fig/Bland_Altman_Plot_{name}.png}}
+\caption{{Bland Altman Plot}}
+\label{{fig:image2}}
+\end{{figure}}
+
+\begin{{table}}[h!]
+\centering
+\begin{{tabular}}{{|c|c|}}
+\hline
+Metric & Value \\ \hline
 """
 
-    # Add rows for the metrics in the list
-    for metric in metrics:
-        if metric in metrics_dict:
-            latex_table += f"{metric} & {metrics_dict[metric]:.2f} \\\\ \\hline\n"
+        for metric in metrics:
+            if metric in metrics_dict:
+                latex_table += f"{metric} & {metrics_dict[metric]:.2f} \\\\ \\hline\n"
 
-    # Close the LaTeX table
-    latex_table += """
-\\end{tabular}
-\\caption{Prediction Results}
-\\label{tab:metrics}
-\\end{table}
+        latex_table += r"""
+\end{tabular}
+\caption{Prediction Results}
+\label{tab:metrics}
+\end{table}
+
+\end{document}
 """
 
     # Print the LaTeX table
     print(latex_table)
+    with open('./Tex/results.tex', 'w') as tex_file:
+        tex_file.write(latex_table)
+
+    os.system("pdflatex ./Tex/results.tex")
