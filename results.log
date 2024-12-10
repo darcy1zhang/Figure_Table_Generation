@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.29)  8 DEC 2024 21:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.10.29)  10 DEC 2024 10:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -65,7 +65,7 @@ File: l3backend-pdftex.def 2024-02-20 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count197
 \l__pdf_internal_box=\box53
 )
-No file results.aux.
+(./results.aux)
 \openout1 = `results.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
@@ -82,6 +82,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
 LaTeX Font Info:    ... okay on input line 7.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
 LaTeX Font Info:    ... okay on input line 7.
+
 (/usr/local/texlive/2024/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count198
@@ -104,53 +105,61 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-<./Fig/Trend_Plot_D_on_sample_level.png, id=1, 722.7pt x 433.62pt>
-File: ./Fig/Trend_Plot_D_on_sample_level.png Graphic file (type png)
-<use ./Fig/Trend_Plot_D_on_sample_level.png>
-Package pdftex.def Info: ./Fig/Trend_Plot_D_on_sample_level.png  used on input 
-line 11.
+<./Fig/Trend_Plot_DP_sample.png, id=1, 722.7pt x 433.62pt>
+File: ./Fig/Trend_Plot_DP_sample.png Graphic file (type png)
+<use ./Fig/Trend_Plot_DP_sample.png>
+Package pdftex.def Info: ./Fig/Trend_Plot_DP_sample.png  used on input line 11.
+
 (pdftex.def)             Requested size: 345.0pt x 206.9972pt.
-<./Fig/Bland_Altman_Plot_D_on_sample_level.png, id=3, 578.16pt x 433.62pt>
-File: ./Fig/Bland_Altman_Plot_D_on_sample_level.png Graphic file (type png)
-<use ./Fig/Bland_Altman_Plot_D_on_sample_level.png>
-Package pdftex.def Info: ./Fig/Bland_Altman_Plot_D_on_sample_level.png  used on
- input line 18.
+<./Fig/Bland_Altman_Plot_DP_subject.png, id=3, 578.16pt x 433.62pt>
+File: ./Fig/Bland_Altman_Plot_DP_subject.png Graphic file (type png)
+<use ./Fig/Bland_Altman_Plot_DP_subject.png>
+Package pdftex.def Info: ./Fig/Bland_Altman_Plot_DP_subject.png  used on input 
+line 18.
 (pdftex.def)             Requested size: 276.00105pt x 206.9972pt.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 25.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 25.
-
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+<./Fig/Bland_Altman_Plot_DP_sample.png, id=4, 578.16pt x 433.62pt>
+File: ./Fig/Bland_Altman_Plot_DP_sample.png Graphic file (type png)
+<use ./Fig/Bland_Altman_Plot_DP_sample.png>
+Package pdftex.def Info: ./Fig/Bland_Altman_Plot_DP_sample.png  used on input l
+ine 25.
+(pdftex.def)             Requested size: 276.00105pt x 206.9972pt.
 
 [1
 
 {/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./Fig/T
-rend_Plot_D_on_sample_level.png> <./Fig/Bland_Altman_Plot_D_on_sample_level.png
->] [2] (./results.aux)
+rend_Plot_DP_sample.png> <./Fig/Bland_Altman_Plot_DP_subject.png>]
+<./Fig/ME_STD_Correspond.png, id=13, 835.12pt x 270.00874pt>
+File: ./Fig/ME_STD_Correspond.png Graphic file (type png)
+<use ./Fig/ME_STD_Correspond.png>
+Package pdftex.def Info: ./Fig/ME_STD_Correspond.png  used on input line 32.
+(pdftex.def)             Requested size: 276.00105pt x 89.23499pt.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 39.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 39.
+ [2 <./Fig/Bland_Altman_Plot_DP_sample.png> <./Fig/ME_STD_Correspond.png>] (./r
+esults.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
  ***********
 
-
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
  ) 
 Here is how much of TeX's memory you used:
- 1388 strings out of 474116
- 23482 string characters out of 5743681
- 1927187 words of memory out of 5000000
- 23790 multiletter control sequences out of 15000+600000
+ 1406 strings out of 474116
+ 23977 string characters out of 5743681
+ 1929187 words of memory out of 5000000
+ 23806 multiletter control sequences out of 15000+600000
  558069 words of font info for 36 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  57i,8n,65p,208b,228s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb>
-Output written on results.pdf (2 pages, 316814 bytes).
+Output written on results.pdf (2 pages, 664785 bytes).
 PDF statistics:
- 21 PDF objects out of 1000 (max. 8388607)
+ 25 PDF objects out of 1000 (max. 8388607)
  10 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
