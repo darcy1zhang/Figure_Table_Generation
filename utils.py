@@ -5,33 +5,21 @@ from scipy.stats import gaussian_kde
 import os
 import pandas as pd
 
-def bland_altman_plot(path):
+def bland_altman_plot(data, name):
     """
     Generate a Bland-Altman plot to visualize the difference between predictions and labels.
 
     Args:
-        path: where the data stored
+        data: data set containing predictions and labels
+        name: name of the vital signal (e.g., SP_on_sample_level)
 
     Outputs:
         Saves the Bland-Altman plot as a PNG file in the './Fig/' directory.
     """
     # Calculate the mean and difference between predictions and labels
-    if path.endswith('.npy'):
-        data = np.load(path)
-        pred = data[:, 0].flatten()
-        label = data[:, 1].flatten()
-    elif path.endswith('.csv'):
-        data = pd.read_csv(path) 
-        pred = data['pred'].to_numpy().flatten()
-        label = data['label'].to_numpy().flatten()
-    else:
-        raise ValueError("Data format should be csv or npy")
-    tmp = path.split('/')[-1]
-    part1 = tmp.split('_')[0]  # 'SP, DP, HR, RR'
-    part2 = tmp.split('_')[1]  # 'sample/subject'
-    name = str(part1) + '_' + str(part2)
-    # print(name)
-    
+    pred = data[:, 1].flatten()
+    label = data[:, 2].flatten()
+
     mean = np.mean([pred, label], axis=0)
     diff = pred - label
     mean_diff = np.mean(diff)  # Mean of the differences
@@ -47,38 +35,26 @@ def bland_altman_plot(path):
     # Add labels, title, and legend
     plt.xlabel('Mean of Two Measurements')
     plt.ylabel('Difference Between Measurements')
-    plt.title(f'Bland-Altman Plot of {name}')
+    name_with_space = name.replace('_', ' ')
+    plt.title(f'Bland-Altman Plot of {name_with_space}')
     plt.legend()
     
     # Save the plot to a file
     plt.savefig('./Fig/Bland_Altman_Plot_' + name + '.png')
 
-def trend_plot(path):
+def trend_plot(data, name):
     """
     Generate a trend plot to visualize how predictions and labels match each other.
 
     Args:
-        path: where the data stored
+        data: data set containing predictions and labels
 
     Outputs:
         Saves the trend plot as a PNG file in the './Fig/' directory.
     """
 
-    if path.endswith('.npy'):
-        data = np.load(path)
-        pred = data[:, 0].flatten()
-        label = data[:, 1].flatten()
-    elif path.endswith('.csv'):
-        data = pd.read_csv(path) 
-        pred = data['pred'].to_numpy().flatten()
-        label = data['label'].to_numpy().flatten()
-    else:
-        raise ValueError("Data format should be csv or npy")
-    
-    tmp = path.split('/')[-1]
-    part1 = tmp.split('_')[0]  # 'SP, DP, HR, RR'
-    part2 = tmp.split('_')[1]  # 'sample/subject'
-    name = str(part1) + '_' + str(part2)
+    pred = data[:, 1].flatten()
+    label = data[:, 2].flatten()
 
     # Sort predictions and labels based on the order of labels
     index = np.argsort(label)
@@ -108,131 +84,111 @@ def trend_plot(path):
              fontsize="x-large", ha='right', va='bottom', transform=plt.gca().transAxes)
     
     # Add title and save the plot
-    plt.title(f'Trend Plot of {name}')
+    name_with_space = name.replace('_', ' ')
+    plt.title(f'Trend Plot of {name_with_space}')
     plt.savefig('./Fig/Trend_Plot_' + name + '.png')
 
-def generate_pdf(sample_level_path, subject_level_path, name, metrics=['ME', 'MAE', 'SD', 'Correlation'], output_latex=True):
+def generate_pdf(vital_signals_):
     """
     Calculate metrics from prediction and label arrays, and display as a table.
 
     Args:
-        pred_path (str): Path to the .npy file for predictions.
-        label_path (str): Path to the .npy file for labels.
-        metrics (list): List of metrics to compute. It can be one of ['ME', 'SD', 'MAE', 'Correlation']
-        output_latex (bool): If True, output the LaTeX format of the table.
+        vital_signal (str): Vital signal name (e.g., 'SP', 'DP', 'HR', 'RR')
     """
 
-    tmp = sample_level_path.split('/')[-1]
-    part1 = tmp.split('_')[0]  # 'SP, DP, HR, RR'
-    part2 = tmp.split('_')[1]  # 'sample/subject'
-    name = str(part1) + '_' + str(part2)
+    vital_signals = [x.strip() for x in vital_signals_.split(',')]
+    print(vital_signals)
+    dict_list = []
+    dict_ID_list = []
 
-    sample_level = 0
-    subject_level = 0
-    # Load the prediction and label arrays
-    if sample_level_path != None:
-        sample_level = 1
-        if sample_level_path.endswith('.npy'):
-            data = np.load(sample_level_path)
-            sample_level_pred = data[:, 0].flatten()
-            sample_level_label = data[:, 1].flatten()
-        elif sample_level_path.endswith('.csv'):
-            data = pd.read_csv(sample_level_path)  
-            sample_level_pred = data['pred'].to_numpy().flatten()
-            sample_level_label = data['label'].to_numpy().flatten()
+    for vital_signal in vital_signals:
+        if os.path.exists(f'./data/{vital_signal}_results.npy'):
+            data = np.load(f'./data/{vital_signal}_results.npy')
+        elif os.path.exists(f'./data/{vital_signal}_results.csv'):
+            data = pd.read_csv(f'./data/{vital_signal}_results.csv')
+            data_tmp1 = data['ID'].to_numpy().reshape(-1, 1)
+            data_tmp2 = data['pred'].to_numpy().reshape(-1, 1)
+            data_tmp3 = data['label'].to_numpy().reshape(-1, 1)
+            data = np.hstack((data_tmp1, data_tmp2, data_tmp3))
         else:
-            raise ValueError("Data format should be csv or npy")
+            raise ValueError(f"Can't find the data file: {vital_signal}_results.npy/csv")
 
-    if subject_level_path != None:
-        subject_level = 1
-        if subject_level_path.endswith('.npy'):
-            data = np.load(subject_level_path)
-            subject_level_pred = data[:, 0].flatten()
-            subject_level_label = data[:, 1].flatten()
-        elif subject_level_path.endswith('.csv'):
-            data = pd.read_csv(subject_level_path)  # 没有列名时用 header=None
-            subject_level_pred = data['pred'].to_numpy().flatten()
-            subject_level_label = data['label'].to_numpy().flatten()
-        else:
-            raise ValueError("Data format should be csv or npy")
+        data_ID_subject = np.unique(data[:, 0])
+        data_pred_subject = []
+        data_label_subject = []
 
+        for i in np.unique(data_ID_subject):
+            data_subject_tmp = data[data[:, 0] == i]
+            data_pred_subject.append(np.mean(data_subject_tmp[:, 1]))
+            data_label_subject.append(np.mean(data_subject_tmp[:, 2]))
+        
+        data_ID_subject = data_ID_subject.reshape(-1, 1)
+        data_pred_subject = np.array(data_pred_subject).reshape(-1, 1)
+        data_label_subject = np.array(data_label_subject).reshape(-1, 1)
+        data_subject = np.hstack((data_ID_subject, data_pred_subject, data_label_subject))
 
-    # Ensure the arrays are of the same length
-    if sample_level and sample_level_pred.shape != sample_level_label.shape:
-        raise ValueError("The shapes of pred and label arrays of sample level must match!")
-    
-    if subject_level and subject_level_pred.shape != subject_level_label.shape:
-        raise ValueError("The shapes of pred and label arrays of subject level must match!")
+        trend_plot(data, vital_signal + '_on_sample_level')
+        bland_altman_plot(data, vital_signal + '_on_sample_level')
+        bland_altman_plot(data_subject, vital_signal + '_on_subject_level')
 
-    # Compute metrics
-    sample_level_mae = np.mean(np.abs(sample_level_pred - sample_level_label))  # Mean Absolute Error
-    sample_level_me = np.mean(sample_level_pred - sample_level_label)          # Mean Error
-    sample_level_correlation = np.corrcoef(sample_level_pred, sample_level_label)[0, 1]  # Correlation coefficient
-    sample_level_std = np.std(sample_level_pred - sample_level_label)          # Standard deviation of errors
+        # Compute metrics
+        sample_level_mae = np.mean(np.abs(data[:, 1] - data[:, 2]))  # Mean Absolute Error
+        sample_level_me = np.mean(data[:, 1] - data[:, 2])          # Mean Error
+        sample_level_correlation = np.corrcoef(data[:, 1], data[:, 2])[0, 1]  # Correlation coefficient
+        sample_level_std = np.std(data[:, 1] - data[:, 2])          # Standard deviation of errors
 
-    subject_level_mae = np.mean(np.abs(subject_level_pred - subject_level_label))  # Mean Absolute Error
-    subject_level_me = np.mean(subject_level_pred - subject_level_label)          # Mean Error
-    subject_level_correlation = np.corrcoef(subject_level_pred, subject_level_label)[0, 1]  # Correlation coefficient
-    subject_level_std = np.std(subject_level_pred - subject_level_label)          # Standard deviation of errors
+        subject_level_mae = np.mean(np.abs(data_subject[:, 1] - data_subject[:, 2]))  # Mean Absolute Error
+        subject_level_me = np.mean(data_subject[:, 1] - data_subject[:, 2])          # Mean Error
+        subject_level_correlation = np.corrcoef(data_subject[:, 1], data_subject[:, 2])[0, 1]  # Correlation coefficient
+        subject_level_std = np.std(data_subject[:, 1] - data_subject[:, 2])          # Standard deviation of errors
 
-    # Create a PrettyTable
-    table = PrettyTable()
-    # table.field_names = ["Metric", "Value"]
-    # if 'MAE' in metrics:
-    #     table.add_row(["MAE", f"{mae:.2f}"])
-    # if 'ME' in metrics:
-    #     table.add_row(["ME", f"{me:.2f}"])
-    # if 'Correlation' in metrics:
-    #     table.add_row(["Correlation", f"{correlation:.2f}"])
-    # if 'SD' in metrics:        
-    #     table.add_row(["SD", f"{std:.2f}"])
-    table.field_names = ["Level", "ME", "MAE", "SD", "Correlation"]
-    table.add_row(['Sample Level', f"{sample_level_me:.2f}", f"{sample_level_mae:.2f}", f"{sample_level_std:.2f}", f"{sample_level_correlation:.2f}"])
-    table.add_row(['Subject Level', f"{sample_level_me:.2f}", f"{sample_level_mae:.2f}", f"{sample_level_std:.2f}", f"{sample_level_correlation:.2f}"])
+        dict_tmp = {}
+        dict_tmp['vital_signal'] = vital_signal + '_on_sample_level'
+        dict_tmp['mae'] = sample_level_mae
+        dict_tmp['me'] = sample_level_me
+        dict_tmp['correlation'] = sample_level_correlation
+        dict_tmp['std'] = sample_level_std
+        dict_list.append(dict_tmp)
+        dict_tmp = {}
+        dict_tmp['vital_signal'] = vital_signal + '_on_subject_level'
+        dict_tmp['mae'] = subject_level_mae
+        dict_tmp['me'] = subject_level_me
+        dict_tmp['correlation'] = subject_level_correlation
+        dict_tmp['std'] = subject_level_std
+        dict_list.append(dict_tmp)
 
-    # Display the table
-    print("Metrics Table:")
-    print(table)
-
-    # Generate LaTeX table if requested
-    if output_latex:
-        # Create a dictionary of metrics and their values
-        # metrics_dict = {
-        #     "MAE": mae,
-        #     "ME": me,
-        #     "Correlation": correlation,
-        #     "SD": std
-        # }
-
-        # Build the LaTeX table dynamically
-        latex_table = rf"""
+        tex_file = rf"""
 \documentclass{{article}}
 \usepackage[utf8]{{inputenc}}
 \usepackage{{graphicx}}
 \usepackage{{float}}
 
 \begin{{document}}
-
+"""
+    for vital_signal in vital_signals:
+        tex_file += rf"""
 \begin{{figure}}[H]
 \centering
-\includegraphics[width=\textwidth]{{./Fig/Trend_Plot_{part1}_sample.png}}
-\caption{{Trend Plot}}
+\includegraphics[width=\textwidth]{{./Fig/Trend_Plot_{vital_signal}_on_sample_level.png}}
+\caption{{Trend Plot of {vital_signal} on sample level.}}
 \label{{fig:image1}}
 \end{{figure}}
 
 \begin{{figure}}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{{./Fig/Bland_Altman_Plot_{part1}_subject.png}}
-\caption{{Bland Altman Plot of subject level}}
-\label{{fig:image2}}
+\includegraphics[width=\textwidth]{{./Fig/Bland_Altman_Plot_{vital_signal}_on_sample_level.png}}
+\caption{{Bland-Altman plot of all subjects' {vital_signal} prediction vs label measurements. Here one dot represents one measurement pair.}}
+\label{{fig:image1}}
 \end{{figure}}
 
 \begin{{figure}}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{{./Fig/Bland_Altman_Plot_{part1}_sample.png}}
-\caption{{Bland Altman Plot of sample level}}
-\label{{fig:image2}}
+\includegraphics[width=\textwidth]{{./Fig/Bland_Altman_Plot_{vital_signal}_on_subject_level.png}}
+\caption{{Bland-Altman plot of each subject's averaged {vital_signal} prediction vs label measurements. Here one dot represents one subject.}}
+\label{{fig:image1}}
 \end{{figure}}
+"""
+    tex_file += rf"""
 
 \begin{{figure}}[H]
 \centering
@@ -245,9 +201,15 @@ def generate_pdf(sample_level_path, subject_level_path, name, metrics=['ME', 'MA
 \centering
 \begin{{tabular}}{{|c|c|c|c|c|}}
 \hline
-Level & ME & MAE & SD & Correlation \\ \hline
-Sample Level & {sample_level_me:.2f} & {sample_level_mae:.2f} & {sample_level_std:.2f} & {sample_level_correlation:.2f} \\ \hline
-Subject Level & {subject_level_me:.2f} & {subject_level_mae:.2f} & {subject_level_std:.2f} & {subject_level_correlation:.2f} \\ \hline
+Vital Signal & ME & MAE & SD & Correlation \\ \hline
+
+"""
+    for ind in range(len(dict_list)):
+        tex_file += rf"""
+{dict_list[ind]['vital_signal'].replace('_', ' ')} & {dict_list[ind]['me']:.2f} & {dict_list[ind]['mae']:.2f} & {dict_list[ind]['std']:.2f} & {dict_list[ind]['correlation']:.2f} \\ \hline
+"""
+    tex_file += rf"""
+
 \end{{tabular}}
 \caption{{Prediction Results}}
 \label{{tab:metrics}}
@@ -257,16 +219,10 @@ Subject Level & {subject_level_me:.2f} & {subject_level_mae:.2f} & {subject_leve
 """
 
     # Print the LaTeX table
-    print(latex_table)
-    with open('./Tex/results.tex', 'w') as tex_file:
-        tex_file.write(latex_table)
+    # print(latex_table)
+    with open('./Tex/results.tex', 'w') as tex:
+        tex.write(tex_file)
 
     os.system("pdflatex ./Tex/results.tex")
-
-# """
-
-#         for metric in metrics:
-#             if metric in metrics_dict:
-#                 latex_table += f"{metric} & {metrics_dict[metric]:.2f} \\\\ \\hline\n"
-
-#         latex_table += r"""
+    os.system("rm ./results.aux ./results.log")
+    os.system("mv ./results.pdf ./pdf/")
