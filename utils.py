@@ -5,6 +5,52 @@ from scipy.stats import gaussian_kde
 import os
 import pandas as pd
 
+
+import numpy as np
+
+def get_max_std(me):
+    """
+    Returns the maximum permissible standard deviation (STD) for a given mean error (ME) 
+    based on the table.
+
+    Parameters:
+        me (float): The mean error in mmHg.
+
+    Returns:
+        float: Maximum permissible STD or None if the value is out of range.
+    """
+    # Define table rows (mean ranges) and columns (mean error ranges)
+    row_values = np.array([0, 1, 2, 3, 4, 5])  # Corresponding to ±0, ±1, ±2, etc.
+    column_values = np.array([0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], dtype=np.float32)
+    
+    # Define the table values (row x column structure)
+    table_values = np.array([
+        [6.95, 6.95, 6.95, 6.93, 6.92, 6.91, 6.90, 6.90, 6.89, 6.88],
+        [6.87, 6.86, 6.84, 6.82, 6.80, 6.78, 6.76, 6.73, 6.71, 6.68],
+        [6.65, 6.62, 6.58, 6.55, 6.51, 6.47, 6.43, 6.39, 6.34, 6.30],
+        [6.25, 6.20, 6.14, 6.09, 6.03, 5.97, 5.89, 5.83, 5.77, 5.70],
+        [5.64, 5.56, 5.49, 5.41, 5.33, 5.25, 5.16, 5.08, 5.01, 4.90],
+        [4.79, None, None, None, None, None, None, None, None, None],
+    ])
+    
+    # Convert ME into absolute value and separate into integer and decimal parts
+    me_abs = abs(me)
+    me_abs = round(me_abs, 1)
+    me_row = int(me_abs)  # Row is based on the integer part
+    me_col = round(me_abs % 1, 1)  # Column is based on the decimal part
+
+    # Check if the ME is out of bounds
+    if me_row > 5 or me_col > 0.9:
+        return None  # Out of table range
+    # Find row and column indices      
+    row_index = np.where(row_values == me_row)[0][0]
+    col_index = np.where(column_values == me_col)#[0][0]
+    
+    # Retrieve the value from the table
+    max_std = table_values[row_index, col_index]
+    
+    return max_std
+
 def bland_altman_plot(data, name):
     """
     Generate a Bland-Altman plot to visualize the difference between predictions and labels.
@@ -24,10 +70,15 @@ def bland_altman_plot(data, name):
     diff = pred - label
     mean_diff = np.mean(diff)  # Mean of the differences
     std_diff = np.std(diff)    # Standard deviation of the differences
-    
+
+    # Calculate density for scatter plot
+    xy = np.vstack([mean, diff])       # Stack mean and diff for density calculation
+    density = gaussian_kde(xy)(xy)     # Kernel density estimation
+
     # Create the Bland-Altman plot
     plt.figure(figsize=(8, 6))
-    plt.scatter(mean, diff, alpha=0.5)  # Scatter plot of mean vs. difference
+    scatter = plt.scatter(mean, diff, c=density, cmap='viridis', s=10)  # Scatter plot with density
+    plt.colorbar(scatter, label='Density')  # Add color bar for density
     plt.axhline(mean_diff, color='gray', linestyle='--', label=f'Mean Difference ({mean_diff:.2f})')  # Mean line
     plt.axhline(mean_diff + 1.96 * std_diff, color='red', linestyle='--', label=f'+1.96 SD ({mean_diff + 1.96 * std_diff:.2f})')  # +1.96 SD line
     plt.axhline(mean_diff - 1.96 * std_diff, color='blue', linestyle='--', label=f'-1.96 SD ({mean_diff - 1.96 * std_diff:.2f})')  # -1.96 SD line
@@ -199,14 +250,28 @@ def generate_pdf(vital_signals_):
 
 \begin{{table}}[h!]
 \centering
-\begin{{tabular}}{{|c|c|c|c|c|}}
+\begin{{tabular}}{{|c|c|c|c|c|c|}}
 \hline
-Vital Signal & ME & MAE & SD & Correlation \\ \hline
+Vital Signal & ME & MAE & SD & Correlation & Whether meet the requirement\\ \hline
 
 """
     for ind in range(len(dict_list)):
+        flag = None
+        if dict_list[ind]['vital_signal'].find('subject') == -1:
+            # sample level
+            if dict_list[ind]['me'] < 5 and dict_list[ind]['std'] < 8:
+                flag = "Yes"
+            else:
+                flag = "No"    
+        else:
+            # subject level
+            required_std = get_max_std(dict_list[ind]['me'])
+            if required_std > dict_list[ind]['std']:
+                flag = "Yes"
+            else:
+                flag = "No"
         tex_file += rf"""
-{dict_list[ind]['vital_signal'].replace('_', ' ')} & {dict_list[ind]['me']:.2f} & {dict_list[ind]['mae']:.2f} & {dict_list[ind]['std']:.2f} & {dict_list[ind]['correlation']:.2f} \\ \hline
+{dict_list[ind]['vital_signal'].replace('_', ' ')} & {dict_list[ind]['me']:.2f} & {dict_list[ind]['mae']:.2f} & {dict_list[ind]['std']:.2f} & {dict_list[ind]['correlation']:.2f} & {flag} \\ \hline
 """
     tex_file += rf"""
 
