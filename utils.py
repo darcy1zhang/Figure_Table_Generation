@@ -34,7 +34,7 @@ def get_max_std(me):
     ])
     
     # Convert ME into absolute value and separate into integer and decimal parts
-    me_abs = abs(me)
+    me_abs = abs(me).astype(np.float32)
     me_abs = round(me_abs, 1)
     me_row = int(me_abs)  # Row is based on the integer part
     me_col = round(me_abs % 1, 1)  # Column is based on the decimal part
@@ -42,9 +42,11 @@ def get_max_std(me):
     # Check if the ME is out of bounds
     if me_row > 5 or me_col > 0.9:
         return None  # Out of table range
-    # Find row and column indices      
+    # Find row and column indices
+    # print(me_row, me_col)   
+    # print(type(column_values[7]), type(me_col))
     row_index = np.where(row_values == me_row)[0][0]
-    col_index = np.where(column_values == me_col)#[0][0]
+    col_index = np.where(column_values == me_col)[0][0]
     
     # Retrieve the value from the table
     max_std = table_values[row_index, col_index]
@@ -259,14 +261,15 @@ Vital Signal & ME & MAE & SD & Correlation & Whether meet the requirement\\ \hli
         flag = None
         if dict_list[ind]['vital_signal'].find('subject') == -1:
             # sample level
-            if dict_list[ind]['me'] < 5 and dict_list[ind]['std'] < 8:
+            if (dict_list[ind]['me'] < 5) and (dict_list[ind]['std'] < 8):
                 flag = "Yes"
             else:
                 flag = "No"    
         else:
             # subject level
             required_std = get_max_std(dict_list[ind]['me'])
-            if required_std > dict_list[ind]['std']:
+            print(dict_list[ind]['me'], required_std, dict_list[ind]['std'])
+            if (required_std > dict_list[ind]['std']) and dict_list[ind]['me'] < 5:
                 flag = "Yes"
             else:
                 flag = "No"
