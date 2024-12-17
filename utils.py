@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 import os
 import pandas as pd
+from matplotlib.colors import LinearSegmentedColormap
 
 
 import numpy as np
@@ -76,14 +77,15 @@ def bland_altman_plot(data, name):
     # Calculate density for scatter plot
     xy = np.vstack([mean, diff])       # Stack mean and diff for density calculation
     density = gaussian_kde(xy)(xy)     # Kernel density estimation
+    custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#B3B3EB", "#3636FF", "#00006C"])
 
     # Create the Bland-Altman plot
     plt.figure(figsize=(8, 6))
-    scatter = plt.scatter(mean, diff, c=density, cmap='viridis', s=10)  # Scatter plot with density
+    scatter = plt.scatter(mean, diff, c=density, cmap=custom_cmap, s=10)  # Scatter plot with density
     plt.colorbar(scatter, label='Density')  # Add color bar for density
     plt.axhline(mean_diff, color='gray', linestyle='--', label=f'Mean Difference ({mean_diff:.2f})')  # Mean line
-    plt.axhline(mean_diff + 1.96 * std_diff, color='red', linestyle='--', label=f'+1.96 SD ({mean_diff + 1.96 * std_diff:.2f})')  # +1.96 SD line
-    plt.axhline(mean_diff - 1.96 * std_diff, color='blue', linestyle='--', label=f'-1.96 SD ({mean_diff - 1.96 * std_diff:.2f})')  # -1.96 SD line
+    plt.axhline(mean_diff + 1.96 * std_diff, color='red', linestyle='-.', label=f'+1.96 SD ({mean_diff + 1.96 * std_diff:.2f})')  # +1.96 SD line
+    plt.axhline(mean_diff - 1.96 * std_diff, color='red', linestyle='--', label=f'-1.96 SD ({mean_diff - 1.96 * std_diff:.2f})')  # -1.96 SD line
     
     # Add labels, title, and legend
     plt.xlabel('Mean of Two Measurements')
@@ -124,11 +126,12 @@ def trend_plot(data, name):
     # Calculate density for scatter plot
     xy = np.vstack([label, pred])       # Stack labels and predictions for density calculation
     density = gaussian_kde(xy)(xy)     # Kernel density estimation
+    custom_cmap = LinearSegmentedColormap.from_list("custom_cmap", ["#B3B3EB", "#3636FF", "#00006C"])
 
     # Create the trend plot
     plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(np.arange(1, pred.shape[0]+1), pred, c=density, cmap='viridis', s=1)  # Scatter plot of predictions
-    plt.scatter(np.arange(1, pred.shape[0]+1), label, c="blue", s=1)                            # Scatter plot of labels
+    scatter = plt.scatter(np.arange(1, pred.shape[0]+1), pred, c=density, cmap=custom_cmap, s=1)  # Scatter plot of predictions
+    plt.scatter(np.arange(1, pred.shape[0]+1), label, c="red", s=1)                            # Scatter plot of labels
     plt.colorbar(scatter, label='Density')  # Add color bar for density
     plt.legend(["Prediction", "Label"], loc="upper left")
     
