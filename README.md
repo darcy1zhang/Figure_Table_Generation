@@ -10,4 +10,4 @@ pip install -r requirements.txt # install the necessary packages
 python plot.py --vital_signal 'SP, DP, HR, RR'
 ```
 
-All the result file should be stored in the folder "./data/". And the name of the file should be "SP/DP/HR/RR_results.npy/csv".
+All the result file should be stored in the folder "./data/". And the name of the file should be "SP/DP/HR/RR_results.npy/csv". In the results file, the first column is ID, the second column is prediction and the last column is label.

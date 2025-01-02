@@ -222,25 +222,26 @@ def generate_pdf(vital_signals_):
 \begin{{document}}
 """
     for vital_signal in vital_signals:
+        vital_signal_name = vital_signal.replace('_', ' ')
         tex_file += rf"""
 \begin{{figure}}[H]
 \centering
 \includegraphics[width=\textwidth]{{./Fig/Trend_Plot_{vital_signal}_on_sample_level.png}}
-\caption{{Trend Plot of {vital_signal} on sample level.}}
+\caption{{Trend Plot of {vital_signal_name} on sample level.}}
 \label{{fig:image1}}
 \end{{figure}}
 
 \begin{{figure}}[H]
 \centering
 \includegraphics[width=\textwidth]{{./Fig/Bland_Altman_Plot_{vital_signal}_on_sample_level.png}}
-\caption{{Bland-Altman plot of all subjects' {vital_signal} prediction vs label measurements. Here one dot represents one measurement pair.}}
+\caption{{Bland-Altman plot of all subjects' {vital_signal_name} prediction vs label measurements. Here one dot represents one measurement pair.}}
 \label{{fig:image1}}
 \end{{figure}}
 
 \begin{{figure}}[H]
 \centering
 \includegraphics[width=\textwidth]{{./Fig/Bland_Altman_Plot_{vital_signal}_on_subject_level.png}}
-\caption{{Bland-Altman plot of each subject's averaged {vital_signal} prediction vs label measurements. Here one dot represents one subject.}}
+\caption{{Bland-Altman plot of each subject's averaged {vital_signal_name} prediction vs label measurements. Here one dot represents one subject.}}
 \label{{fig:image1}}
 \end{{figure}}
 """
